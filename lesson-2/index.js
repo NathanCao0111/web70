@@ -1,4 +1,4 @@
-const http = require("http");
+// const http = require("http");
 // const express = require("express");
 // const app = express();
 // const port = 5000;
@@ -79,6 +79,7 @@ const express = require("express");
 const app = express();
 const crypto = require("crypto");
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // req.params
@@ -89,12 +90,51 @@ const todoList = [
     date: new Date(),
     status: "Pending",
   },
+  {
+    id: crypto.randomUUID(),
+    todoName: "Do dishes",
+    date: new Date(),
+    status: "Pending",
+  },
+  {
+    id: crypto.randomUUID(),
+    todoName: "Learn backend programming",
+    date: new Date(),
+    status: "Pending",
+  },
 ];
 
 app.get("/api/v1/todo-list", (req, res) => {
   try {
     const queryParams = req.query;
-    const getTodoByFields = todoList.map((element) => {});
+    const getTodoByFields = todoList.map((element) => {
+      if (Object.keys(queryParams).length !== 0) {
+        let mappingTodo = {};
+        for (let key in element) {
+          if (Number(queryParams[key])) {
+            mappingTodo[key] = element[key];
+          } else if (Number(queryParams[key]) === 0) {
+            const getNewElement = {
+              ...element,
+            };
+            for (let keyOfQuery in queryParams) {
+              delete getNewElement[keyOfQuery];
+            }
+            mappingTodo = {
+              ...getNewElement,
+            };
+          }
+        }
+        return mappingTodo;
+      } else {
+        return element;
+      }
+    });
+    res.send({
+      data: getTodoByFields,
+      message: "Success",
+      success: true,
+    });
   } catch (error) {
     res.send({
       data: null,
@@ -106,12 +146,16 @@ app.get("/api/v1/todo-list", (req, res) => {
 
 app.post("/api/v1/todo-list", (req, res) => {
   const dataBody = req.body;
-		todoList.push(dataBody)
-		res.send({
-			data: todoList,
-			message: 'Success',
-			success: true
-		})
+  console.log(req.body);
+  todoList.push({
+    ...dataBody,
+    id: crypto.randomUUID(),
+  });
+  res.send({
+    data: todoList,
+    message: "Success",
+    success: true,
+  });
 });
 
 app.get("/api/v1/todo-list/:id", (req, res) => {
