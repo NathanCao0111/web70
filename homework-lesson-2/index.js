@@ -1,6 +1,9 @@
 const express = require("express");
 const app = express();
 const port = 8000;
+const crypto = require("crypto");
+
+app.use(express.json());
 
 // Bai 1
 const todoList = [
@@ -70,7 +73,6 @@ app.get("/api/todo-list", (req, res) => {
   }
 });
 
-
 // Bai 2
 const users = [
   {
@@ -100,15 +102,77 @@ const users = [
 ];
 
 app.get("/api/users", (req, res) => {
-  res.send({
-    data: users,
-    message: "Thành công",
-    success: true,
-  });
+  try {
+    const queryUsername = req.query.username;
+    const querySortAge = req.query.sort;
+    let filteredUsers = [];
+    if (queryUsername) {
+      const getUsersByUsername = users.filter((element) => {
+        return element.username
+          .toLowerCase()
+          .includes(queryUsername.toLowerCase());
+      });
+      filteredUsers = [...getUsersByUsername];
+    } else if (querySortAge) {
+      const sortUsersByAge = users.sort((a, b) => {
+        if (querySortAge.toLowerCase() === "asc") {
+          return a.age - b.age;
+        } else if (querySortAge.toLowerCase() === "desc") {
+          return b.age - a.age;
+        } else {
+          return users;
+        }
+      });
+      filteredUsers = [...sortUsersByAge];
+    } else {
+      const defaultUsers = users.sort((a, b) => a.age - b.age);
+      filteredUsers = [...defaultUsers];
+    }
+    res.send({
+      data: filteredUsers,
+      message: "Thành công",
+      success: true,
+    });
+  } catch (error) {
+    res.send({
+      data: null,
+      message: error.message,
+      success: false,
+    });
+  }
 });
 
-
-
+app.post("/api/users", (req, res) => {
+  try {
+    const bodyData = req.body;
+    const existingUser = users.some((element) => {
+      return element.username === bodyData.username;
+    });
+    if (!existingUser) {
+      users.push({
+        id: crypto.randomUUID(),
+        ...bodyData,
+      });
+      res.send({
+        data: users,
+        message: "Tạo mới user thành công",
+        success: true,
+      });
+    } else {
+      res.send({
+        data: null,
+        message: "Thất bại! User đã tồn tại",
+        success: false,
+      });
+    }
+  } catch (error) {
+    res.send({
+      data: null,
+      message: error.message,
+      success: false,
+    });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Bài tập Lesson 2: Express");
