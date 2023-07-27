@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const crypto = require("crypto");
+const posts = require("./utils/mockData");
 
 const students = [
   {
@@ -52,18 +54,16 @@ const requireApiKey = (req, res, next) => {
 app.get("/students", requireApiKey, logMdw, (req, res, next) => {
   if (req.hasApiKey) {
     res.json(students);
-  }
-  else {
-    res.json(students.filter(student => !student.private))
+  } else {
+    res.json(students.filter((student) => !student.private));
   }
 });
 
 app.get("/teachers", requireApiKey, logMdw, (req, res, next) => {
   if (req.hasApiKey) {
     res.json(teachers);
-  }
-  else {
-    res.json(teachers.filter(teacher => !teacher.private))
+  } else {
+    res.json(teachers.filter((teacher) => !teacher.private));
   }
 });
 
@@ -89,6 +89,44 @@ app.get("/teachers", requireApiKey, logMdw, (req, res, next) => {
 // app.get('/teachers', (req, res) => {
 // 	res.json(teachers)
 // })
+
+// Lecture
+app.get("/api/v1/posts/:id", (req, res) => {
+  // step 1: get post id
+  const postId = req.params.id;
+
+  // step 2: find existing post
+  const existingPost = posts.find((element) => element.id === postId);
+
+  // step 3: validation
+  if (!existingPost) {
+    return res.json({
+      message: "Post is not existed",
+    });
+  }
+
+  // step 4: response client
+  return res.json({
+    data: existingPost,
+  });
+});
+
+app.post("/api/v1/posts", (req, res) => {
+  const body = req.body;
+  const newPost = {
+    id: crypto.randomUUID(),
+    ...body,
+  };
+  posts.push(newPost);
+  res.json({
+    data: posts,
+  });
+});
+
+// Lab
+app.put('/api/v1/posts/:id', (req, res) => {})
+
+app.delete('/api/v1/posts/:id', (req, res) => {})
 
 app.get("/", (req, res) => {
   res.send("home");

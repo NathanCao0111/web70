@@ -181,6 +181,69 @@ app.get("/api/v1/todo-list/:id", (req, res) => {
   }
 });
 
+app.put('/api/v1/todo-list/:id', (req, res) => {
+  try {
+    const body = req.body
+    const { id } = req.params
+    const findTodoItem = todoList.find(element => element.id === id)
+    if (!findTodoItem) {
+      throw new Error('Cannot find todo item')
+    }
+    for (const key in body) {
+      if (findTodoItem[key]) {
+        findTodoItem[key] = body[key]
+      }
+    }
+    res.status(201).send({
+      data: todoList,
+      message: 'Success',
+      success: true
+    })
+  } catch(error) {
+    res.status(404).send({
+      data: null,
+      message: error.message,
+      success: false
+    })
+  }
+})
+
+app.delete('/api/v1/todo-list/:id', (req, res) => {
+  try {
+
+    // step 1: tim vi tri element 
+    const { id } = req.params
+    const getTodoList = [
+      ...todoList
+    ]
+    const findDeleteElement = getTodoList.findIndex(element => element.id === id)
+    console.log(getTodoList)
+    // step 2: check findIndex(-1, 0, 1)
+    // step 3: xoa element tai vi tri (splice)
+    if (findDeleteElement !== -1) {
+      getTodoList.splice(findDeleteElement, 1)
+      res.send({
+        data: getTodoList,
+        message: 'Success',
+        success: true
+      })
+    } else {
+      res.send({
+        data: {},
+        message: 'Cannot find element',
+        success: false
+      })
+    }
+  }
+  catch (error) {
+    res.status(404).send({
+      data: null,
+      message: error.message,
+      success: false
+    })
+  }
+})
+
 app.listen(8000, () =>
   console.log(`Server is running at http://localhost:8000`)
 );

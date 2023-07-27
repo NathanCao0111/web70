@@ -40,7 +40,7 @@ app.get("/api/todo-list", (req, res) => {
       if (Object.keys(queryParams).length !== 0) {
         let mappingTodo = {};
         for (let key in element) {
-          if (Number(queryParams[key]) === 1) {
+          if (Number(queryParams[key]) && element[key]) {
             mappingTodo[key] = element[key];
           } else if (Number(queryParams[key]) === 0) {
             const getNewElement = {
@@ -52,6 +52,10 @@ app.get("/api/todo-list", (req, res) => {
             mappingTodo = {
               ...getNewElement,
             };
+          } else {
+            mappingTodo = {
+              ...element
+            }
           }
         }
         return mappingTodo;
