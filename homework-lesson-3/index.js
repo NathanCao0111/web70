@@ -109,29 +109,25 @@ app.post("/api/posts", (req, res) => {
   try {
     const userId = req.query.userId;
     const body = req.body;
-    const findUser = users.find((user) => {
-      if (user.id !== userId) {
-        return;
-      } else {
-        return user;
-      }
-    });
-    if (Object.keys(findUser).length !== 0) {
+    const findUser = users.find((user) => user.id === userId);
+    if (findUser) {
       posts.push({
+        ...body,
         id: crypto.randomUUID(),
         userId: findUser.id,
-        ...body,
       });
-      res.status(200).send({
-        data: posts,
-        message: "Success",
-        success: true,
-      });
+    } else {
+      throw new Error("Người dùng không tồn tại")
     }
+    res.status(200).send({
+      data: posts,
+      message: "Success",
+      success: true,
+    });
   } catch (error) {
     res.status(404).send({
       data: null,
-      status: "Người dùng không tồn tại",
+      status: error.message,
       success: false,
     });
   }
@@ -143,21 +139,9 @@ app.put("/api/posts/:id", (req, res) => {
     const postId = req.params.id;
     const userId = req.query.userId;
     const body = req.body;
-    const findUser = users.find((user) => {
-      if (user.id !== userId) {
-        return;
-      } else {
-        return user;
-      }
-    });
+    const findUser = users.find((user) => user.id === userId);
     if (findUser) {
-      const findPost = posts.find((post) => {
-        if (post.id !== postId) {
-          return;
-        } else {
-          return post;
-        }
-      });
+      const findPost = posts.find((post) => post.id === postId);
       if (findPost) {
         for (const key in body) {
           if (findPost[key] && key !== "id" && key !== "userId") {
@@ -188,16 +172,14 @@ app.put("/api/posts/:id", (req, res) => {
 app.delete("/api/posts/:id", (req, res) => {
   try {
     const postId = req.params.id;
-    let renderedPost = [];
-    renderedPost = [...posts];
     const findPost = posts.findIndex((post) => post.id === postId);
     if (findPost !== -1) {
-      renderedPost.splice(findPost, 1);
+      posts.splice(findPost, 1);
     } else {
       throw new Error("Bài viết không tồn tại");
     }
     res.status(200).send({
-      data: renderedPost,
+      data: posts,
       message: "Success",
       success: true,
     });
@@ -214,12 +196,10 @@ app.delete("/api/posts/:id", (req, res) => {
 app.delete("/api/users/:id", (req, res) => {
   try {
     const id = req.params.id;
-    let renderedUsers = [];
     let renderedPosts = [];
-    renderedUsers = [...users];
     const findUser = users.findIndex((user) => user.id === id);
     if (findUser !== -1) {
-      renderedUsers.splice(findUser, 1);
+      users.splice(findUser, 1);
       const filteredPosts = posts.filter((post) => {
         return post.userId !== id;
       });
@@ -228,7 +208,7 @@ app.delete("/api/users/:id", (req, res) => {
       throw new Error("Người dùng không tồn tại");
     }
     res.status(200).send({
-      users: renderedUsers,
+      users: users,
       posts: renderedPosts,
       message: "Success",
       success: true,
