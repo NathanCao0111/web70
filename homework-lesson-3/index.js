@@ -3,12 +3,14 @@ const app = express();
 const port = 8000;
 const crypto = require("crypto");
 const { users, posts } = require("./data");
+const logApi = require("./middlewares/logApi");
+const checkUser = require("./middlewares/checkUser");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // bai 1
-app.get("/api/users", (req, res) => {
+app.get("/api/users", logApi, (req, res) => {
   try {
     res.status(200).send({
       data: users,
@@ -117,7 +119,7 @@ app.post("/api/posts", (req, res) => {
         userId: findUser.id,
       });
     } else {
-      throw new Error("Người dùng không tồn tại")
+      throw new Error("Người dùng không tồn tại");
     }
     res.status(200).send({
       data: posts,
