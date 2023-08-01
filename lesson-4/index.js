@@ -8,6 +8,7 @@ const port = process.env.PORT || API_PORT;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("./model/user");
+const auth = require("./middleware/auth");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -53,11 +54,7 @@ app.post("/register", async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    res.status(404).send({
-      data: null,
-      message: error.message,
-      success: false,
-    });
+    res.status(404).send(error.message);
   }
 });
 
@@ -93,12 +90,13 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid Credentials");
     }
   } catch (error) {
-    res.status(404).send({
-      data: null,
-      message: error.message,
-      success: false,
-    });
+    res.status(404).send(error.message);
   }
+});
+
+app.get("/welcome", auth, (req, res) => {
+  console.log(req.user.email)
+  res.status(200).send("Welcome");
 });
 
 app.get("/", (req, res) => {

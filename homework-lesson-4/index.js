@@ -1,0 +1,13 @@
+const express = require("express");
+const app = express();
+const port = 8000;
+const route = require("./routes");
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+route(app);
+
+app.listen(port, () =>
+  console.log(`Server is running at http://localhost:${port}`)
+);
