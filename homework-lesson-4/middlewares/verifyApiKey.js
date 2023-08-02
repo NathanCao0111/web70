@@ -8,7 +8,7 @@ const verifyApiKey = (req, res, next) => {
     if (findPost) {
       if (apiKey) {
         const validateApiKey = users.find((user) => {
-          return apiKey.includes(user.username);
+          return apiKey.split(".")[0].includes(user.username);
         });
         if (!validateApiKey) {
           throw new Error("Không được phép");
