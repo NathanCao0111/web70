@@ -1,40 +1,43 @@
 const Restaurant = require("../model/restaurant");
+const resClientData = require("../../utils/resCLientData");
 
 class RestaurantsController {
   // [GET] /
   async all(req, res) {
     try {
       const allRestaurants = await Restaurant.find();
-      res.status(200).json(allRestaurants);
+      resClientData(res, 200, allRestaurants);
     } catch (error) {
-      res.status(400).send(error.message);
+      resClientData(res, 400, null, error.message);
     }
   }
 
-  // [GET] /find/zipcode/:id
-  async findZipcode(req, res) {
+  // [GET] /find/
+  async find(req, res) {
     try {
-      const { id } = req.params;
-      console.log(id);
-      const zipcodeRestaurants = await Restaurant.find({
-        "address.zipcode": id,
-      });
-      res.status(200).send(zipcodeRestaurants);
-    } catch (error) {
-      res.status(400).send(error.message);
-    }
-  }
+      const { zipcode, borough, cuisine, street } = req.query;
+      const query = {};
 
-  // [GET] /find/cuisine/:id
-  async findCuisine(req, res) {
-    try {
-      const { id } = req.params;
-      const cuisineRestaurants = await Restaurant.find({
-        "cuisine": id,
-      });
-      res.status(200).send(cuisineRestaurants);
+      if (zipcode) {
+        query["address.zipcode"] = zipcode;
+      }
+
+      if (borough) {
+        query.borough = borough;
+      }
+
+      if (cuisine) {
+        query.cuisine = cuisine;
+      }
+
+      if (street) {
+        query["address.street"] = street;
+      }
+
+      const findRestaurants = await Restaurant.find(query);
+      resClientData(res, 200, findRestaurants);
     } catch (error) {
-      res.status(400).send(error.message);
+      resClientData(res, 400, null, error.message);
     }
   }
 }
