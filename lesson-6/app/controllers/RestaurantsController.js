@@ -40,6 +40,77 @@ class RestaurantsController {
       resClientData(res, 400, null, error.message);
     }
   }
+
+  // [GET] /ratings/quantity
+  async ratingsQuantity(req, res) {
+    try {
+      const { quantity } = req.query;
+      const rateQuantities = await Restaurant.aggregate([
+        {
+          $set: {
+            numberOfGrades: { $size: "$grades" },
+          },
+        },
+        {
+          $match: {
+            numberOfGrades: { $gt: Number(quantity) },
+          },
+        },
+      ]);
+      resClientData(res, 200, rateQuantities);
+    } catch (error) {
+      resClientData(res, 400, null, error.message);
+    }
+  }
+
+  // [GET] /ratings/rate
+  async ratingsRate(req, res) {
+    try {
+      const { rate } = req.query;
+      const rateData = rate.toUpperCase();
+      const rateOfRatings = await Restaurant.aggregate([
+        {
+          $unwind: "$grades",
+        },
+        {
+          $group: {
+            _id: { _id: "$_id", name: "$name" },
+            rate: {$addToSet: "$grades.grade"},
+          },
+        },
+        {
+          $match: { rate: rateData },
+        },
+      ]);
+      resClientData(res, 200, rateOfRatings);
+    } catch (error) {
+      resClientData(res, 400, null, error.message);
+    }
+  }
+
+  // [GET] /ratings/score
+  async score(req, res) {
+    try {
+      const { score } = req.query;
+      const minScore = await Restaurant.aggregate([
+        {
+          $unwind: "$grades",
+        },
+        {
+          $group: {
+            _id: { _id: "$_id", name: "$name" },
+            totalScore: { $sum: "$grades.score" },
+          },
+        },
+        {
+          $match: { totalScore: { $gt: Number(score) } },
+        },
+      ]);
+      resClientData(res, 200, minScore);
+    } catch (error) {
+      resClientData(res, 400, null, error.message);
+    }
+  }
 }
 
 module.exports = new RestaurantsController();

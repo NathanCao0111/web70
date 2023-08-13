@@ -6,6 +6,9 @@ const restaurantsController = require("../app/controllers/RestaurantsController"
 
 router.get("/", restaurantsController.all);
 router.get("/find", restaurantsController.find);
+router.get("/ratings/quantity", restaurantsController.ratingsQuantity);
+router.get("/ratings/rate", restaurantsController.ratingsRate);
+router.get("/ratings/score", restaurantsController.score);
 
 router.get("/sort", async (req, res) => {
   try {
