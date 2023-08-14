@@ -4,6 +4,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = process.env;
+const auth = require("../middlewares/auth");
 
 router.post("/login", async (req, res) => {
   try {
@@ -23,12 +24,12 @@ router.post("/login", async (req, res) => {
     if (!existingUser || !isMatchPassword) {
       throw new Error("Invalid email or password");
     }
-    
+
     // 3. Create a signed jwt token
     const jwtPayload = {
       fullname: existingUser.fullname,
       email: existingUser.email,
-      createdAt: existingUser.createdAt,
+      id: existingUser._id,
     };
     const token = jwt.sign(jwtPayload, SECRET_KEY, {
       expiresIn: "5m",
@@ -38,8 +39,7 @@ router.post("/login", async (req, res) => {
     existingUser.token = token;
 
     res.status(200).send({
-      data: existingUser,
-      token: token,
+      data: token,
       message: "Success",
       success: "true",
     });
@@ -84,6 +84,18 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.get("/me", (req, res) => {});
+router.get("/me", auth, async (req, res) => {
+  try {
+    const { id } = req.user;
+    const user = await User.findById({ _id: id }).select("-password");
+    res.status(200).send({
+      data: user,
+      message: "Success",
+      success: true,
+    });
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+});
 
 module.exports = router;
