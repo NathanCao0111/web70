@@ -8,7 +8,7 @@ router.get("/", restaurantsController.all);
 router.get("/find", restaurantsController.find);
 router.get("/ratings/quantity", restaurantsController.ratingsQuantity);
 router.get("/ratings/rate", restaurantsController.ratingsRate);
-router.get("/ratings/score", restaurantsController.score);
+router.get("/ratings/score", restaurantsController.ratingsScore);
 
 router.get("/sort", async (req, res) => {
   try {
@@ -16,7 +16,7 @@ router.get("/sort", async (req, res) => {
       { $unwind: { path: "$grades" } },
       {
         $group: {
-          _id: { _id: "$_id", name: "$name", address: "$address" },
+          _id: { _id: "$_id", name: "$name" },
           totalScore: { $sum: "$grades.score" },
         },
       },
@@ -40,7 +40,6 @@ router.post("/restaurant/create", async (req, res) => {
       name: name,
       restaurant_id: restaurant_id,
     });
-    console.log(await Restaurant.find({}));
     res.status(200).send("Inserted");
   } catch (error) {
     res.status(400).send(error.message);

@@ -73,13 +73,7 @@ class RestaurantsController {
           $unwind: "$grades",
         },
         {
-          $group: {
-            _id: { _id: "$_id", name: "$name" },
-            rate: {$addToSet: "$grades.grade"},
-          },
-        },
-        {
-          $match: { rate: rateData },
+          $match: { "grades.grade": rateData },
         },
       ]);
       resClientData(res, 200, rateOfRatings);
@@ -89,7 +83,7 @@ class RestaurantsController {
   }
 
   // [GET] /ratings/score
-  async score(req, res) {
+  async ratingsScore(req, res) {
     try {
       const { score } = req.query;
       const minScore = await Restaurant.aggregate([
