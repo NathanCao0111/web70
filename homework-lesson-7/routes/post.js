@@ -3,8 +3,10 @@ const router = express.Router();
 
 const postsController = require("../controllers/PostsController");
 const auth = require("../middlewares/auth");
+const logger = require("../middlewares/logger");
 
 router.use(auth);
+router.use(logger);
 
 router.post("/", postsController.create);
 router.get("/", postsController.get);
