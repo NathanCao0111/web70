@@ -24,7 +24,7 @@ class PostsController {
   // [GET] /
   async get(req, res) {
     try {
-      const posts = await Post.find({});
+      const posts = await Post.findWithDeleted({});
       resClientData(res, 200, posts);
     } catch (error) {
       resClientData(res, 400, null, error.message);
@@ -35,11 +35,11 @@ class PostsController {
   async update(req, res) {
     try {
       const { id } = req.params;
-      const post = await Post.findOne({ _id: id });
+      const post = await Post.findOneWithDeleted({ _id: id });
       if (req.user.id !== post.userId) {
         throw new Error("Unauthorized");
       }
-      const updatedPost = await Post.updateOne(
+      const updatedPost = await Post.updateOneWithDeleted(
         { _id: req.params.id },
         req.body
       );
@@ -53,7 +53,7 @@ class PostsController {
   async getId(req, res) {
     try {
       const { id } = req.params;
-      const post = await Post.findOne({ _id: id });
+      const post = await Post.findOneWithDeleted({ _id: id });
       resClientData(res, 200, post);
     } catch (error) {
       resClientData(res, 400, null, error.message);
@@ -64,7 +64,7 @@ class PostsController {
   async like(req, res) {
     try {
       const { id } = req.params;
-      const likedPost = await Post.findById({ _id: id });
+      const likedPost = await Post.findOneWithDeleted({ _id: id });
       if (!likedPost.liked) {
         likedPost.liked = 1;
       } else {
